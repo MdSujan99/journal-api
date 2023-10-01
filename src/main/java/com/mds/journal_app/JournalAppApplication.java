@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@ComponentScan(basePackages = "com.mds.")
+@ComponentScan(basePackages = "com.mds.*")
 public class JournalAppApplication {
 
 	public static void main(String[] args) {
