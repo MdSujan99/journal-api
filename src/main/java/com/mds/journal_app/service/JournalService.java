@@ -21,18 +21,14 @@ public class JournalService {
             PostJournalRequest postJournalRequest) {
         // todo
         //  - add validations
-        //  - add check for creating duplicate journal
-
         journalRepo.save(
                 Journal.builder()
                         .title(postJournalRequest.getTitle())
-                        .dateCreated(postJournalRequest.getDateCreated())
                         .description(postJournalRequest.getDescription())
                         .build());
         return PostJournalResponse.builder()
                 .title(postJournalRequest.getTitle())
                 .description(postJournalRequest.getDescription())
-                .dateCreated(postJournalRequest.getDateCreated())
                 .build();
     }
 

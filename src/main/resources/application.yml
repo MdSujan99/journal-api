@@ -4,3 +4,5 @@ spring:
       uri: "mongodb://localhost:27017/"
       database: journal-app
       auto-index-creation: true
+      repositories:
+        enabled: true
