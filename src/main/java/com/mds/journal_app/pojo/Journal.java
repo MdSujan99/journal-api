@@ -1,5 +1,6 @@
 package com.mds.journal_app.pojo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
@@ -13,6 +14,7 @@ import java.time.Instant;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Journal {
+    @JsonIgnore
     @Id
     String id;
     String title;

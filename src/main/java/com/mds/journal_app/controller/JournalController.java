@@ -52,10 +52,10 @@ public class JournalController {
             @RequestParam Instant dateFrom,
             @RequestParam Instant dateTo) {
         log.info("getJournalEntriesByDate() initiated");
-        return ResponseEntity.ok().body(journalService.getJournalsByDate(dateFrom, dateTo));
+        return ResponseEntity.ok().body(journalService.getJournalEntriesByDate(dateFrom, dateTo));
     }
     @GetMapping("journal")
-    public ResponseEntity<List<JournalEntry>> getAllJournals() {
+    public ResponseEntity<List<Journal>> getAllJournals() {
         log.info("getAllJournals() initiated");
         return ResponseEntity.ok().body(journalService.getAllJournals());
     }

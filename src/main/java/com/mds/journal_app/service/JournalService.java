@@ -18,6 +18,9 @@ public class JournalService {
 
     public PostJournalResponse postJournal(
             PostJournalRequest postJournalRequest) {
+        // todo
+        //  - add validations
+        //  - add check for creating duplicate journal
         journalRepo.save(
                 Journal.builder()
                         .title(postJournalRequest.getTitle())
@@ -35,11 +38,11 @@ public class JournalService {
         return null;
     }
 
-    public List<JournalEntry> getJournalsByDate(Instant dateFrom, Instant dateTo) {
+    public List<JournalEntry> getJournalEntriesByDate(Instant dateFrom, Instant dateTo) {
         return null;
     }
 
-    public List<JournalEntry> getAllJournals() {
-        return null;
+    public List<Journal> getAllJournals() {
+        return journalRepo.findAll();
     }
 }
