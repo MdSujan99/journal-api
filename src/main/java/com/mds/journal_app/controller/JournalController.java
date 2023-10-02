@@ -58,10 +58,11 @@ public class JournalController {
      */
     @GetMapping("journal/{journalId}/entry")
     public ResponseEntity<List<JournalEntry>> getJournalEntriesByDate(
+            @PathVariable String journalId,
             @RequestParam Instant dateFrom,
-            @RequestParam Instant dateTo) {
+            @RequestParam Instant dateTo) throws JournalNotFoundException {
         log.info("getJournalEntriesByDate() initiated");
-        return ResponseEntity.ok().body(journalService.getJournalEntriesByDate(dateFrom, dateTo));
+        return ResponseEntity.ok().body(journalService.getJournalEntriesByDate(journalId, dateFrom, dateTo));
     }
 
     @GetMapping("journal")

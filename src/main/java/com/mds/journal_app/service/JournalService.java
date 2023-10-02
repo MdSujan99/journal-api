@@ -13,9 +13,8 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -84,9 +83,22 @@ public class JournalService {
         return formatter.format(instant);
     }
 
-    public List<JournalEntry> getJournalEntriesByDate(Instant dateFrom, Instant dateTo) {
-        // todo
-        return null;
+    public List<JournalEntry> getJournalEntriesByDate(String journalId, Instant dateFrom, Instant dateTo) throws JournalNotFoundException {
+        Journal journal = findJournalById(journalId);
+        Map<String, JournalEntry> journalEntryMap = journal.getJournalEntryMap();
+
+        if (journalEntryMap == null || journalEntryMap.isEmpty()) {
+            // Return an empty list if journalEntryMap is null or empty
+            return Collections.emptyList();
+        }
+
+        return journalEntryMap.entrySet().stream()
+                .filter(entry -> {
+                    Instant entryDate = Instant.parse(entry.getKey());
+                    return !entryDate.isBefore(dateFrom) && !entryDate.isAfter(dateTo);
+                })
+                .map(Map.Entry::getValue)
+                .collect(Collectors.toList());
     }
 
     public List<Journal> getAllJournals() {
