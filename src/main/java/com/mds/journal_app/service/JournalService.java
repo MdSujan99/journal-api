@@ -1,11 +1,12 @@
 package com.mds.journal_app.service;
 
-import com.mds.journal_app.pojo.Journal;
-import com.mds.journal_app.pojo.PostJournalRequest;
-import com.mds.journal_app.pojo.PostJournalResponse;
+import com.mds.journal_app.pojo.*;
 import com.mds.journal_app.repo.JournalRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.time.Instant;
+import java.util.List;
 
 @Service
 public class JournalService {
@@ -28,5 +29,17 @@ public class JournalService {
                 .description(postJournalRequest.getDescription())
                 .dateCreated(postJournalRequest.getDateCreated())
                 .build();
+    }
+
+    public PostJournalEntryResponse postJournalEntry(PostJournalEntryRequest postJournalEntryRequest) {
+        return null;
+    }
+
+    public List<JournalEntry> getJournalsByDate(Instant dateFrom, Instant dateTo) {
+        return null;
+    }
+
+    public List<JournalEntry> getAllJournals() {
+        return null;
     }
 }
