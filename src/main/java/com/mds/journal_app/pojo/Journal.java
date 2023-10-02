@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
@@ -17,6 +18,7 @@ public class Journal {
     @JsonIgnore
     @Id
     String id;
+    @Indexed(unique = true)
     String title;
     String description;
     Instant dateCreated;

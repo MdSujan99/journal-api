@@ -1,12 +1,12 @@
 package com.mds.journal_app.controller;
 
 import com.mds.journal_app.pojo.*;
+import com.mds.journal_app.service.JournalService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import com.mds.journal_app.service.JournalService;
 
 import java.time.Instant;
 import java.util.List;

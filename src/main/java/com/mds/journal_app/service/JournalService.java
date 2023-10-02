@@ -12,7 +12,8 @@ import java.util.List;
 public class JournalService {
     @Autowired
     JournalRepo journalRepo;
-    public String testGet(){
+
+    public String testGet() {
         return "test success";
     }
 
@@ -21,6 +22,7 @@ public class JournalService {
         // todo
         //  - add validations
         //  - add check for creating duplicate journal
+
         journalRepo.save(
                 Journal.builder()
                         .title(postJournalRequest.getTitle())
