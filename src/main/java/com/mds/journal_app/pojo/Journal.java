@@ -13,6 +13,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.Instant;
+import java.util.Map;
 
 @Document("journal")
 @Data
@@ -22,13 +23,20 @@ public class Journal {
     @JsonIgnore
     @Id
     String id;
+
     @Indexed(unique = true)
     String title;
+
     String description;
+
     @CreatedDate
     @Field("createdAt")
     Instant createdAt;
+
     @LastModifiedDate
     @Field("updatedAt")
     Instant updatedAt;
+
+    @JsonIgnore
+    Map<String, JournalEntry> journalEntryMap;
 }

@@ -1,6 +1,10 @@
 package com.mds.journal_app.controller;
 
-import com.mds.journal_app.pojo.*;
+import com.mds.journal_app.exceptions.JournalNotFoundException;
+import com.mds.journal_app.pojo.Journal;
+import com.mds.journal_app.pojo.JournalEntry;
+import com.mds.journal_app.pojo.PostJournalEntryRequest;
+import com.mds.journal_app.pojo.PostJournalRequest;
 import com.mds.journal_app.service.JournalService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,20 +32,25 @@ public class JournalController {
      * create new journal
      */
     @PostMapping("/journal")
-    public ResponseEntity<PostJournalResponse> createUpdateJournal(
+    public ResponseEntity<String> createJournal(
             @RequestBody PostJournalRequest postJournalRequest) {
         log.info("createUpdateJournal() initiated");
-        return ResponseEntity.ok().body(journalService.postJournal(postJournalRequest));
+        journalService.postJournal(postJournalRequest);
+        return ResponseEntity.ok().body("journal created successfully!");
     }
 
     /**
      * create new entry in a journal
      */
     @PostMapping("journal/{journalId}/entry")
-    public ResponseEntity<PostJournalEntryResponse> createJournalEntry(
-            @RequestBody PostJournalEntryRequest postJournalEntryRequest) {
+    public ResponseEntity<String> createJournalEntry(
+            @PathVariable String journalId,
+            @RequestBody PostJournalEntryRequest postJournalEntryRequest)
+            throws JournalNotFoundException {
         log.info("createJournalEntry() initiated");
-        return ResponseEntity.ok().body(journalService.postJournalEntry(postJournalEntryRequest));
+        journalService.postJournalEntry(journalId, postJournalEntryRequest);
+        return ResponseEntity.ok()
+                .body("journal entry created successfully!");
     }
 
     /**
@@ -54,6 +63,7 @@ public class JournalController {
         log.info("getJournalEntriesByDate() initiated");
         return ResponseEntity.ok().body(journalService.getJournalEntriesByDate(dateFrom, dateTo));
     }
+
     @GetMapping("journal")
     public ResponseEntity<List<Journal>> getAllJournals() {
         log.info("getAllJournals() initiated");
