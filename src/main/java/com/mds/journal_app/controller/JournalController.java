@@ -18,6 +18,7 @@ import java.util.List;
 @Controller
 @RequestMapping("/api/")
 @Slf4j
+@CrossOrigin(origins = "http://localhost:3000")
 public class JournalController {
     @Autowired
     private JournalService journalService;
@@ -69,5 +70,14 @@ public class JournalController {
     public ResponseEntity<List<Journal>> getAllJournals() {
         log.info("getAllJournals() initiated");
         return ResponseEntity.ok().body(journalService.getAllJournals());
+    }
+
+    @DeleteMapping("journal/{journalId}")
+    public ResponseEntity<List<Journal>> deleteJournalById(
+            @PathVariable String journalId
+    ) {
+        log.info("delete journal by id:{} initiated", journalId);
+        journalService.deleteJournalById(journalId);
+        return ResponseEntity.ok().body(null);
     }
 }

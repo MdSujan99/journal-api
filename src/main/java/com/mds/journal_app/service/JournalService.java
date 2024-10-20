@@ -1,10 +1,7 @@
 package com.mds.journal_app.service;
 
 import com.mds.journal_app.exceptions.JournalNotFoundException;
-import com.mds.journal_app.pojo.Journal;
-import com.mds.journal_app.pojo.JournalEntry;
-import com.mds.journal_app.pojo.PostJournalEntryRequest;
-import com.mds.journal_app.pojo.PostJournalRequest;
+import com.mds.journal_app.pojo.*;
 import com.mds.journal_app.repo.JournalRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,5 +100,9 @@ public class JournalService {
 
     public List<Journal> getAllJournals() {
         return journalRepo.findAll();
+    }
+
+    public void deleteJournalById(String journalId) {
+        journalRepo.deleteById(journalId);
     }
 }
