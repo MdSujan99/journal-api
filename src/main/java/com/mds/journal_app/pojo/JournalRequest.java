@@ -9,6 +9,6 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class JournalRequest {
-    String title;
-    String description;
+  String title;
+  String description;
 }
