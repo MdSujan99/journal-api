@@ -1,13 +1,12 @@
 package com.mds.journal_app.service;
 
+import com.mds.journal_app.dao.Journal;
 import com.mds.journal_app.exceptions.JournalNotFoundException;
-import com.mds.journal_app.pojo.Journal;
-import com.mds.journal_app.pojo.JournalEntry;
-import com.mds.journal_app.pojo.PostJournalEntryRequest;
-import com.mds.journal_app.pojo.PostJournalRequest;
-import com.mds.journal_app.repo.JournalRepo;
+import com.mds.journal_app.mapper.JournalMapper;
+import com.mds.journal_app.pojo.*;
+import com.mds.journal_app.dao.JournalRepo;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -18,9 +17,12 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class JournalService {
-    @Autowired
-    JournalRepo journalRepo;
+
+    private final JournalRepo journalRepo;
+
+    private final JournalMapper journalMapper;
 
     public String testGet() {
         return "test success";
@@ -30,28 +32,28 @@ public class JournalService {
      * create a new journal
      */
     public void postJournal(
-            PostJournalRequest postJournalRequest) {
-        validateCreateJournal(postJournalRequest);
+            JournalRequest journalRequest) {
+        validateCreateJournal(journalRequest);
         journalRepo.save(
                 Journal.builder()
-                        .title(postJournalRequest.getTitle())
-                        .description(postJournalRequest.getDescription())
+                        .title(journalRequest.getTitle())
+                        .description(journalRequest.getDescription())
                         .build());
     }
 
     private void validateCreateJournal(
-            PostJournalRequest postJournalRequest) {
+            JournalRequest journalRequest) {
         log.info("validateCreateJournal - validations passed");
     }
 
     private void validateCreateJournalEntry(
-            PostJournalEntryRequest postJournalEntryRequest) {
+            JournalEntryRequest journalEntryRequest) {
         log.info("validateCreateJournalEntry - validations passed");
     }
 
     public void postJournalEntry(
             String journalId,
-            PostJournalEntryRequest postJournalEntryRequest) throws JournalNotFoundException {
+            JournalEntryRequest journalEntryRequest) throws JournalNotFoundException {
         // find the journal by id
         Journal existingJournal = findJournalById(journalId);
 
@@ -61,11 +63,11 @@ public class JournalService {
         }
         Instant entryDate = Instant.now();
         String key = getJournalEntryKey(entryDate);
-        JournalEntry journalEntry = JournalEntry.builder()
-                .textContent(postJournalEntryRequest.getTextContent())
+        JournalEntryResponse journalEntryResponse = JournalEntryResponse.builder()
+                .textContent(journalEntryRequest.getTextContent())
                 .dateCreated(entryDate)
                 .build();
-        existingJournal.getJournalEntryMap().put(key, journalEntry);
+        existingJournal.getJournalEntryMap().put(key, journalEntryResponse);
         journalRepo.save(existingJournal);
     }
 
@@ -83,9 +85,9 @@ public class JournalService {
         return formatter.format(instant);
     }
 
-    public List<JournalEntry> getJournalEntriesByDate(String journalId, Instant dateFrom, Instant dateTo) throws JournalNotFoundException {
+    public List<JournalEntryResponse> getJournalEntriesByDate(String journalId, Instant dateFrom, Instant dateTo) throws JournalNotFoundException {
         Journal journal = findJournalById(journalId);
-        Map<String, JournalEntry> journalEntryMap = journal.getJournalEntryMap();
+        Map<String, JournalEntryResponse> journalEntryMap = journal.getJournalEntryMap();
 
         if (journalEntryMap == null || journalEntryMap.isEmpty()) {
             // Return an empty list if journalEntryMap is null or empty
@@ -101,7 +103,14 @@ public class JournalService {
                 .collect(Collectors.toList());
     }
 
-    public List<Journal> getAllJournals() {
-        return journalRepo.findAll();
+    public List<JournalResponse> getAllJournals() {
+        List<Journal> allJournals = journalRepo.findAll();
+        return allJournals.stream()
+                .map(journal -> journalMapper.toJournalResponse(journal)).toList();
+    }
+
+    public void deleteJournalById(String journalId) throws JournalNotFoundException {
+        findJournalById(journalId);
+        journalRepo.deleteById(journalId);
     }
 }

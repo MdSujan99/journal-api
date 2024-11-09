@@ -5,10 +5,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
+import java.time.Instant;
+
 @Data
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class PostJournalRequest {
-    String title;
-    String description;
+public class JournalEntryResponse {
+    String textContent;
+    Instant dateCreated;
 }

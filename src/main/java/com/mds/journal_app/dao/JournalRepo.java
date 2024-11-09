@@ -1,6 +1,5 @@
-package com.mds.journal_app.repo;
+package com.mds.journal_app.dao;
 
-import com.mds.journal_app.pojo.Journal;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
