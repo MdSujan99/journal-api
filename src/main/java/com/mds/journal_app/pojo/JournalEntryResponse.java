@@ -10,7 +10,7 @@ import java.time.Instant;
 @Data
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class JournalEntry {
+public class JournalEntryResponse {
     String textContent;
     Instant dateCreated;
 }

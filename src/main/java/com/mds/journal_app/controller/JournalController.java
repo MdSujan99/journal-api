@@ -1,13 +1,11 @@
 package com.mds.journal_app.controller;
 
 import com.mds.journal_app.exceptions.JournalNotFoundException;
-import com.mds.journal_app.pojo.Journal;
-import com.mds.journal_app.pojo.JournalEntry;
-import com.mds.journal_app.pojo.PostJournalEntryRequest;
-import com.mds.journal_app.pojo.PostJournalRequest;
+import com.mds.journal_app.pojo.*;
 import com.mds.journal_app.service.JournalService;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -19,9 +17,10 @@ import java.util.List;
 @RequestMapping("/api/")
 @Slf4j
 @CrossOrigin(origins = "http://localhost:3000")
+@RequiredArgsConstructor
 public class JournalController {
-    @Autowired
-    private JournalService journalService;
+
+    private final JournalService journalService;
 
     @GetMapping("/test")
     public ResponseEntity<String> testGet() {
@@ -58,7 +57,7 @@ public class JournalController {
      * get all the entries for a journal between a date range
      */
     @GetMapping("journal/{journalId}/entry")
-    public ResponseEntity<List<JournalEntry>> getJournalEntriesByDate(
+    public ResponseEntity<List<JournalEntryResponse>> getJournalEntriesByDate(
             @PathVariable String journalId,
             @RequestParam Instant dateFrom,
             @RequestParam Instant dateTo) throws JournalNotFoundException {
@@ -67,7 +66,7 @@ public class JournalController {
     }
 
     @GetMapping("journal")
-    public ResponseEntity<List<Journal>> getAllJournals() {
+    public ResponseEntity<List<JournalResponse>> getAllJournals() {
         log.info("getAllJournals() initiated");
         return ResponseEntity.ok().body(journalService.getAllJournals());
     }
@@ -75,7 +74,7 @@ public class JournalController {
     @DeleteMapping("journal/{journalId}")
     public ResponseEntity<List<Journal>> deleteJournalById(
             @PathVariable String journalId
-    ) {
+    ) throws JournalNotFoundException {
         log.info("delete journal by id:{} initiated", journalId);
         journalService.deleteJournalById(journalId);
         return ResponseEntity.ok().body(null);

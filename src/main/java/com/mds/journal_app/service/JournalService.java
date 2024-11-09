@@ -1,10 +1,12 @@
 package com.mds.journal_app.service;
 
 import com.mds.journal_app.exceptions.JournalNotFoundException;
+import com.mds.journal_app.mapper.JournalMapper;
 import com.mds.journal_app.pojo.*;
 import com.mds.journal_app.repo.JournalRepo;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -15,9 +17,12 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class JournalService {
-    @Autowired
-    JournalRepo journalRepo;
+
+    private final JournalRepo journalRepo;
+
+    private final JournalMapper journalMapper;
 
     public String testGet() {
         return "test success";
@@ -58,11 +63,11 @@ public class JournalService {
         }
         Instant entryDate = Instant.now();
         String key = getJournalEntryKey(entryDate);
-        JournalEntry journalEntry = JournalEntry.builder()
+        JournalEntryResponse journalEntryResponse = JournalEntryResponse.builder()
                 .textContent(postJournalEntryRequest.getTextContent())
                 .dateCreated(entryDate)
                 .build();
-        existingJournal.getJournalEntryMap().put(key, journalEntry);
+        existingJournal.getJournalEntryMap().put(key, journalEntryResponse);
         journalRepo.save(existingJournal);
     }
 
@@ -80,9 +85,9 @@ public class JournalService {
         return formatter.format(instant);
     }
 
-    public List<JournalEntry> getJournalEntriesByDate(String journalId, Instant dateFrom, Instant dateTo) throws JournalNotFoundException {
+    public List<JournalEntryResponse> getJournalEntriesByDate(String journalId, Instant dateFrom, Instant dateTo) throws JournalNotFoundException {
         Journal journal = findJournalById(journalId);
-        Map<String, JournalEntry> journalEntryMap = journal.getJournalEntryMap();
+        Map<String, JournalEntryResponse> journalEntryMap = journal.getJournalEntryMap();
 
         if (journalEntryMap == null || journalEntryMap.isEmpty()) {
             // Return an empty list if journalEntryMap is null or empty
@@ -98,11 +103,14 @@ public class JournalService {
                 .collect(Collectors.toList());
     }
 
-    public List<Journal> getAllJournals() {
-        return journalRepo.findAll();
+    public List<JournalResponse> getAllJournals() {
+        List<Journal> allJournals = journalRepo.findAll();
+        return allJournals.stream()
+                .map(journal -> journalMapper.toJournalResponse(journal)).toList();
     }
 
-    public void deleteJournalById(String journalId) {
+    public void deleteJournalById(String journalId) throws JournalNotFoundException {
+        findJournalById(journalId);
         journalRepo.deleteById(journalId);
     }
 }
