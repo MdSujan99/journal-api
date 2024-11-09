@@ -1,10 +1,10 @@
 package com.mds.journal_app.service;
 
+import com.mds.journal_app.dao.Journal;
 import com.mds.journal_app.exceptions.JournalNotFoundException;
 import com.mds.journal_app.mapper.JournalMapper;
 import com.mds.journal_app.pojo.*;
-import com.mds.journal_app.repo.JournalRepo;
-import lombok.AllArgsConstructor;
+import com.mds.journal_app.dao.JournalRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -32,28 +32,28 @@ public class JournalService {
      * create a new journal
      */
     public void postJournal(
-            PostJournalRequest postJournalRequest) {
-        validateCreateJournal(postJournalRequest);
+            JournalRequest journalRequest) {
+        validateCreateJournal(journalRequest);
         journalRepo.save(
                 Journal.builder()
-                        .title(postJournalRequest.getTitle())
-                        .description(postJournalRequest.getDescription())
+                        .title(journalRequest.getTitle())
+                        .description(journalRequest.getDescription())
                         .build());
     }
 
     private void validateCreateJournal(
-            PostJournalRequest postJournalRequest) {
+            JournalRequest journalRequest) {
         log.info("validateCreateJournal - validations passed");
     }
 
     private void validateCreateJournalEntry(
-            PostJournalEntryRequest postJournalEntryRequest) {
+            JournalEntryRequest journalEntryRequest) {
         log.info("validateCreateJournalEntry - validations passed");
     }
 
     public void postJournalEntry(
             String journalId,
-            PostJournalEntryRequest postJournalEntryRequest) throws JournalNotFoundException {
+            JournalEntryRequest journalEntryRequest) throws JournalNotFoundException {
         // find the journal by id
         Journal existingJournal = findJournalById(journalId);
 
@@ -64,7 +64,7 @@ public class JournalService {
         Instant entryDate = Instant.now();
         String key = getJournalEntryKey(entryDate);
         JournalEntryResponse journalEntryResponse = JournalEntryResponse.builder()
-                .textContent(postJournalEntryRequest.getTextContent())
+                .textContent(journalEntryRequest.getTextContent())
                 .dateCreated(entryDate)
                 .build();
         existingJournal.getJournalEntryMap().put(key, journalEntryResponse);

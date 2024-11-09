@@ -1,9 +1,9 @@
 package com.mds.journal_app.controller;
 
+import com.mds.journal_app.dao.Journal;
 import com.mds.journal_app.exceptions.JournalNotFoundException;
 import com.mds.journal_app.pojo.*;
 import com.mds.journal_app.service.JournalService;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -33,9 +33,9 @@ public class JournalController {
      */
     @PostMapping("/journal")
     public ResponseEntity<String> createJournal(
-            @RequestBody PostJournalRequest postJournalRequest) {
+            @RequestBody JournalRequest journalRequest) {
         log.info("createUpdateJournal() initiated");
-        journalService.postJournal(postJournalRequest);
+        journalService.postJournal(journalRequest);
         return ResponseEntity.ok().body("journal created successfully!");
     }
 
@@ -45,10 +45,10 @@ public class JournalController {
     @PostMapping("journal/{journalId}/entry")
     public ResponseEntity<String> createJournalEntry(
             @PathVariable String journalId,
-            @RequestBody PostJournalEntryRequest postJournalEntryRequest)
+            @RequestBody JournalEntryRequest journalEntryRequest)
             throws JournalNotFoundException {
         log.info("createJournalEntry() initiated");
-        journalService.postJournalEntry(journalId, postJournalEntryRequest);
+        journalService.postJournalEntry(journalId, journalEntryRequest);
         return ResponseEntity.ok()
                 .body("journal entry created successfully!");
     }

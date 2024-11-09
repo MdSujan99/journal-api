@@ -1,6 +1,7 @@
-package com.mds.journal_app.pojo;
+package com.mds.journal_app.dao;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.mds.journal_app.pojo.JournalEntryResponse;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
