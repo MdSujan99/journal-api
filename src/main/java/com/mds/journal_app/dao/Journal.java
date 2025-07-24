@@ -1,6 +1,9 @@
-package com.mds.journal_app.pojo;
+package com.mds.journal_app.dao;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.mds.journal_app.pojo.JournalEntryResponse;
+import java.time.Instant;
+import java.util.Map;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
@@ -12,31 +15,25 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.time.Instant;
-import java.util.Map;
-
 @Document("journal")
 @Data
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Journal {
-    @JsonIgnore
-    @Id
-    String id;
+  @JsonIgnore @Id String id;
 
-    @Indexed(unique = true)
-    String title;
+  @Indexed(unique = true)
+  String title;
 
-    String description;
+  String description;
 
-    @CreatedDate
-    @Field("createdAt")
-    Instant createdAt;
+  @CreatedDate
+  @Field("createdAt")
+  Instant createdAt;
 
-    @LastModifiedDate
-    @Field("updatedAt")
-    Instant updatedAt;
+  @LastModifiedDate
+  @Field("updatedAt")
+  Instant updatedAt;
 
-    @JsonIgnore
-    Map<String, JournalEntry> journalEntryMap;
+  @JsonIgnore Map<String, JournalEntryResponse> journalEntryMap;
 }

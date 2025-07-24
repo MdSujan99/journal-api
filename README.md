@@ -12,8 +12,8 @@ A basic REST API for managing journals built on SpringBoot.
 
 ## Introduction
 
-The Journal API is a simple REST API developed using Spring Boot, designed for journal management. It provides basic
-CRUD (Create, Read, Update, Delete) operations for managing journal entries.
+The Journal API is a simple REST API developed using Spring Boot, designed for journalResponse management. It provides basic
+CRUD (Create, Read, Update, Delete) operations for managing journalResponse entries.
 
 ## Getting Started
 
@@ -31,10 +31,10 @@ To set up and run the Journal API, follow these steps:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/journal-api.git
+   git clone https://github.com/yourusername/journalResponse-api.git
 2. Navigate to the project directory:
     ```bash
-   cd journal-api
+   cd journalResponse-api
 3. Build the project using Maven:
    ```bash
    ./gradlew build
