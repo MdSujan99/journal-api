@@ -21,12 +21,6 @@ public class JournalController {
 
   private final JournalService journalService;
 
-  @GetMapping("/test")
-  public ResponseEntity<String> testGet() {
-    log.info("testGet() initiated");
-    return ResponseEntity.ok().body(journalService.testGet());
-  }
-
   /** create new journal */
   @PostMapping("/journal")
   public ResponseEntity<String> createJournal(@RequestBody JournalRequest journalRequest) {
