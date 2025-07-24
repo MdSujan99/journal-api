@@ -47,7 +47,7 @@ class JournalControllerTest {
   void createJournalEntry_ShouldReturnSuccess() throws JournalNotFoundException {
     // Arrange
     String journalId = "123";
-    JournalEntryRequest request = new JournalEntryRequest();
+    JournalEntryRequest request = JournalEntryRequest.builder().build();
     request.setTextContent("Test Entry");
     doNothing()
         .when(journalService)
@@ -67,7 +67,7 @@ class JournalControllerTest {
       throws JournalNotFoundException {
     // Arrange
     String journalId = "123";
-    JournalEntryRequest request = new JournalEntryRequest();
+    JournalEntryRequest request = JournalEntryRequest.builder().build();
     doThrow(new JournalNotFoundException())
         .when(journalService)
         .postJournalEntry(eq(journalId), any(JournalEntryRequest.class));
