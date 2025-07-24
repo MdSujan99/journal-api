@@ -1,121 +1,30 @@
-# Journal API Performance Test Plan
+Use **Postman** to run performance (perf) tests on your Journal API. The latest Postman desktop app includes built-in *
+*performance testing features** that let you simulate real-world traffic by configuring multiple **virtual users**, test
+durations, and ramp-up profiles. Key metrics—such as **response times, throughput (requests per second), and error rates
+**—are displayed in real time in the Collection Runner interface.
 
-## Overview
-This document outlines the performance testing strategy for the Journal API, focusing on the two most frequently used endpoints.
+**How to run a performance test in Postman:**
 
-## Test Scenarios
+1. Use the **desktop app** (not the web version).
+2. Organize your API requests into a Collection.
+3. Open the Collection Runner, go to the **Performance** tab, and configure:
 
-### 1. POST /api/journal/{journalId}/entry
-Testing creation of new journal entries
+- Number of virtual users
+- Test duration
+- Load profile (fixed or ramp-up)
 
-#### Test Cases
-- Single user creating entries sequentially
-- Multiple users creating entries concurrently
-- Bulk entry creation simulation
+4. Run the test and monitor live metrics.
+5. Export reports after the test if needed.
 
-#### Test Parameters
-- Virtual Users: 10, 50, 100
-- Ramp-up Period: 30 seconds
-- Test Duration: 5 minutes
-- Think Time: 1-3 seconds between requests
-- Payload Size: ~500 bytes (typical journal entry)
+**Limitations:**
 
-#### Success Criteria
-- Response Time: P95 < 500ms
-- Error Rate: < 1%
-- Throughput: > 100 requests/second
+- All load is generated from your local machine—cloud-based distributed testing is not supported.
+- The number of virtual users and scalability depend on your computer’s resources.
+- Some advanced features and higher usage may require a paid plan.
 
-### 2. GET /api/journal/{journalId}/entry
-Testing retrieval of journal entries within date ranges
+For **basic API performance testing and bottleneck identification on small or medium workloads, Postman is a practical
+and user-friendly option**. For high-scale, distributed, or production-grade testing, dedicated tools (like JMeter or
+Gatling) offer more power and control.
 
-#### Test Cases
-- Single user querying entries
-- Multiple users querying same time ranges
-- Queries with varying date ranges (small to large)
-
-#### Test Parameters
-- Virtual Users: 20, 100, 200
-- Ramp-up Period: 30 seconds
-- Test Duration: 5 minutes
-- Think Time: 2-5 seconds between requests
-- Date Range Variations: 1 day, 1 week, 1 month
-
-#### Success Criteria
-- Response Time: P95 < 1000ms
-- Error Rate: < 1%
-- Throughput: > 200 requests/second
-
-## Test Environment
-
-### Infrastructure Requirements
-- Test Environment: Matching production specifications
-- Database: MongoDB (matching production config)
-- Network: Isolated test network
-- Monitoring Tools: JVM metrics, MongoDB metrics
-
-### Test Data
-- Pre-populated journals: 100
-- Pre-populated entries per journal: 1000
-- Data distribution: Entries spread across 12 months
-
-## Test Execution
-
-### Tools
-- Apache JMeter for load testing
-- Grafana + Prometheus for monitoring
-- Custom scripts for data generation
-
-### Test Execution Steps
-1. Reset test database to known state
-2. Start monitoring tools
-3. Execute test scenarios individually
-4. Run combined load test
-5. Generate performance reports
-
-### Monitoring Metrics
-- Response times (min, max, average, P95)
-- Throughput (requests/second)
-- Error rates
-- CPU utilization
-- Memory usage
-- Database connection pool stats
-- MongoDB query performance
-
-## Reporting
-
-### Performance Report Contents
-1. Executive Summary
-2. Test Scenarios Overview
-3. Test Results vs Success Criteria
-4. Performance Bottlenecks
-5. Recommendations
-
-### Performance Metrics to Track
-- Average Response Time
-- 95th Percentile Response Time
-- Maximum Response Time
-- Requests per Second
-- Error Rate
-- System Resource Utilization
-
-## Risk Mitigation
-1. Database backup before testing
-2. Monitoring system resources
-3. Test data isolation
-4. Gradual load increase
-5. Emergency shutdown procedure
-
-## Tools Setup
-
-### JMeter Test Plan Structure
-```
-Journal API Test Plan
-├── Thread Group - Create Entry
-│   ├── HTTP Request - Create Entry
-│   ├── Response Assertions
-│   └── Response Time Assertions
-└── Thread Group - Get Entries
-    ├── HTTP Request - Get Entries
-    ├── Response Assertions
-    └── Response Time Assertions
-```
+**Summary:** Postman is suitable for small to moderate performance tests and provides a quick, visual, and accessible
+way to simulate traffic and measure API responsiveness locally.
