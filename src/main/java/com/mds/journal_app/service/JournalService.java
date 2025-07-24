@@ -18,38 +18,29 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @RequiredArgsConstructor
 public class JournalService {
-
   private final JournalRepo journalRepo;
-
   private final JournalMapper journalMapper;
 
-  public String testGet() {
-    return "test success";
-  }
-
-  /** create a new journal */
   public void postJournal(JournalRequest journalRequest) {
+    log.info("postJournal - request: {}", journalRequest);
     validateCreateJournal(journalRequest);
     journalRepo.save(
         Journal.builder()
             .title(journalRequest.getTitle())
             .description(journalRequest.getDescription())
             .build());
+    log.info("postJournal - journal created successfully");
   }
 
   private void validateCreateJournal(JournalRequest journalRequest) {
     log.info("validateCreateJournal - validations passed");
   }
 
-  private void validateCreateJournalEntry(JournalEntryRequest journalEntryRequest) {
-    log.info("validateCreateJournalEntry - validations passed");
-  }
-
   public void postJournalEntry(String journalId, JournalEntryRequest journalEntryRequest)
       throws JournalNotFoundException {
+    log.info("postJournalEntry - request: {}", journalEntryRequest);
     // find the journal by id
     Journal existingJournal = findJournalById(journalId);
-
     // make a new entry in its journalEntriesMap
     if (Objects.isNull(existingJournal.getJournalEntryMap())) {
       existingJournal.setJournalEntryMap(new HashMap<>());
@@ -63,15 +54,21 @@ public class JournalService {
             .build();
     existingJournal.getJournalEntryMap().put(key, journalEntryResponse);
     journalRepo.save(existingJournal);
+    log.info("postJournalEntry - journal entry added successfully for journalId: {}", journalId);
   }
 
   private Journal findJournalById(String journalId) throws JournalNotFoundException {
+    log.info("findJournalById - journalId: {}", journalId);
     Journal existingJournal = journalRepo.findById(journalId).orElse(null);
-    if (Objects.nonNull(existingJournal)) return existingJournal;
+    if (Objects.nonNull(existingJournal)) {
+      log.info("findJournalById - journal found: {}", existingJournal);
+      return existingJournal;
+    }
     throw new JournalNotFoundException();
   }
 
   private static String getJournalEntryKey(Instant instant) {
+    log.info("getJournalEntryKey - instant: {}", instant);
     // Define a formatter with the desired format
     DateTimeFormatter formatter =
         DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'").withZone(ZoneOffset.UTC);
@@ -80,11 +77,17 @@ public class JournalService {
 
   public List<JournalEntryResponse> getJournalEntriesByDate(
       String journalId, Instant dateFrom, Instant dateTo) throws JournalNotFoundException {
+    log.info(
+        "getJournalEntriesByDate - journalId: {}, dateFrom: {}, dateTo: {}",
+        journalId,
+        dateFrom,
+        dateTo);
     Journal journal = findJournalById(journalId);
     Map<String, JournalEntryResponse> journalEntryMap = journal.getJournalEntryMap();
 
     if (journalEntryMap == null || journalEntryMap.isEmpty()) {
       // Return an empty list if journalEntryMap is null or empty
+      log.info("getJournalEntriesByDate - no journal entries found for journalId: {}", journalId);
       return Collections.emptyList();
     }
 
@@ -99,12 +102,21 @@ public class JournalService {
   }
 
   public List<JournalResponse> getAllJournals() {
+    log.info("getAllJournals - fetching all journals");
     List<Journal> allJournals = journalRepo.findAll();
-    return allJournals.stream().map(journal -> journalMapper.toJournalResponse(journal)).toList();
+    if (allJournals.isEmpty()) {
+      log.info("getAllJournals - no journals found");
+      return Collections.emptyList();
+    }
+    log.info("getAllJournals - found {} journals", allJournals.size());
+
+    return allJournals.stream().map(journalMapper::toJournalResponse).toList();
   }
 
   public void deleteJournalById(String journalId) throws JournalNotFoundException {
+    log.info("deleteJournalById - journalId: {}", journalId);
     findJournalById(journalId);
     journalRepo.deleteById(journalId);
+    log.info("deleteJournalById - journal deleted successfully for journalId: {}", journalId);
   }
 }
