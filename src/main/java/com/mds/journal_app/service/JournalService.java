@@ -1,6 +1,6 @@
 package com.mds.journal_app.service;
 
-import static com.mds.journal_app.pojo.JournalConstants.JOURNAL_NOT_FOUND_MSG;
+import static com.mds.journal_app.pojo.JournalConstants.*;
 
 import com.mds.journal_app.dao.Journal;
 import com.mds.journal_app.dao.JournalRepo;
@@ -14,6 +14,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -27,44 +28,53 @@ public class JournalService {
 
   public PostJournalResponse postJournal(JournalRequest journalRequest) {
     log.info("postJournal - request: {}", journalRequest);
-    validatePostJournal(journalRequest);
-    Journal savedJournal =
-        journalRepo.save(
-            Journal.builder()
-                .title(journalRequest.getTitle())
-                .description(journalRequest.getDescription())
-                .build());
-    log.info("postJournal - journal saved successfully");
-    return PostJournalResponse.builder()
-        .journalId(savedJournal.getId())
-        .message("Journal saved successfully!")
-        .build();
-  }
-
-  private void validatePostJournal(JournalRequest journalRequest) {
-    log.info("validateUpdateRequest initiated for journalRequest: {}", journalRequest);
     if (StringUtils.hasText(journalRequest.getId())) {
-      log.info("validateUpdateRequest - journalId is present: {}", journalRequest.getId());
-      validateUpdateRequest(journalRequest);
+      return handleUpdateJournal(journalRequest);
+    } else {
+      return handleCreateJournal(journalRequest);
     }
-    log.info("validateUpdateRequest completed for journalRequest: {}", journalRequest);
   }
 
-  private void validateUpdateRequest(JournalRequest journalRequest) {
-    // Check if a journal with the same title already exists
-    Optional<Journal> existingJournal = journalRepo.findById(journalRequest.getId());
-    if (existingJournal.isPresent()) {
-      if (!StringUtils.hasText(journalRequest.getId())) {
+  private PostJournalResponse handleCreateJournal(JournalRequest journalRequest) {
+    try {
+      Journal journal =
+          journalRepo.save(
+              Journal.builder()
+                  .title(journalRequest.getTitle())
+                  .description(journalRequest.getDescription())
+                  .createdAt(Instant.now())
+                  .updatedAt(Instant.now())
+                  .build());
+      return PostJournalResponse.builder()
+          .id(journal.getId())
+          .message(JOURNAL_CREATION_SUCCESS_MSG)
+          .build();
+    } catch (DuplicateKeyException e) {
+      log.error("postJournal - Duplicate key error while creating journal: {}", e.getMessage());
+      throw new AppException("Journal with the same title already exists", 400);
+    }
+  }
+
+  private PostJournalResponse handleUpdateJournal(JournalRequest journalRequest) {
+    try {
+      log.info("postJournal - updating existing journal with id: {}", journalRequest.getId());
+      Optional<Journal> existingJournal = journalRepo.findById(journalRequest.getId());
+      if (existingJournal.isPresent()) {
+        log.info("postJournal - updating existing journal with id: {}", journalRequest.getId());
+        Journal journal = existingJournal.get();
+        journal.setTitle(journalRequest.getTitle());
+        journal.setDescription(journalRequest.getDescription());
+        journalRepo.save(journal);
+        return PostJournalResponse.builder()
+            .id(journal.getId())
+            .message("Journal updated successfully")
+            .build();
+      } else {
         throw new AppException(JOURNAL_NOT_FOUND_MSG, 404);
       }
-      // verify if the every field is same as the existing journal
-      // if all fields are same, then throw an exception
-      Journal journal = existingJournal.get();
-      if (journal.getTitle().equals(journalRequest.getTitle())
-          && Objects.equals(journal.getDescription(), journalRequest.getDescription())) {
-        throw new IllegalArgumentException(
-            "Journal with the same title and description already exists");
-      }
+    } catch (DuplicateKeyException e) {
+      log.error("postJournal - Duplicate key error while updating journal: {}", e.getMessage());
+      throw new AppException("Journal with the same title already exists", 400);
     }
   }
 
