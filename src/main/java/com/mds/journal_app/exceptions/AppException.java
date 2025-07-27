@@ -12,7 +12,7 @@ public class AppException extends RuntimeException {
   String message;
   int errorCode;
 
-  public AppException(String message, int v) {
+  public AppException(String message, int errorCode) {
     this.message = message;
     this.errorCode = errorCode;
   }
