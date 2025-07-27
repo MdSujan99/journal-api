@@ -7,7 +7,7 @@ import static org.mockito.Mockito.*;
 
 import com.mds.journal_app.controller.JournalController;
 import com.mds.journal_app.dao.Journal;
-import com.mds.journal_app.exceptions.JournalNotFoundException;
+import com.mds.journal_app.exceptions.AppException;
 import com.mds.journal_app.pojo.*;
 import com.mds.journal_app.service.JournalService;
 import java.time.Instant;
@@ -28,23 +28,20 @@ class JournalControllerTest {
   @InjectMocks private JournalController journalController;
 
   @Test
-  void createJournal_ShouldReturnSuccess() {
+  void postJournal_ShouldReturnSuccess() {
     // Arrange
     JournalRequest request = JournalRequest.builder().build();
     request.setTitle("Test Journal");
-    doNothing().when(journalService).postJournal(any(JournalRequest.class));
-
+    when(journalService.postJournal(any())).thenReturn(PostJournalResponse.builder().build());
     // Act
-    ResponseEntity<String> response = journalController.createJournal(request);
-
+    ResponseEntity<PostJournalResponse> response = journalController.postJournal(request);
     // Assert
-    assertEquals("journal created successfully!", response.getBody());
     assertEquals(HttpStatusCode.valueOf(200), response.getStatusCode());
-    verify(journalService).postJournal(request);
+    verify(journalService, times(1)).postJournal(request);
   }
 
   @Test
-  void createJournalEntry_ShouldReturnSuccess() throws JournalNotFoundException {
+  void postJournalEntry_ShouldReturnSuccess() {
     // Arrange
     String journalId = "123";
     JournalEntryRequest request = JournalEntryRequest.builder().build();
@@ -63,24 +60,22 @@ class JournalControllerTest {
   }
 
   @Test
-  void createJournalEntry_WhenJournalNotFound_ShouldThrowException()
-      throws JournalNotFoundException {
+  void postJournalEntry_WhenJournalNotFound_ShouldThrowException() {
     // Arrange
     String journalId = "123";
     JournalEntryRequest request = JournalEntryRequest.builder().build();
-    doThrow(new JournalNotFoundException())
+    doThrow(AppException.class)
         .when(journalService)
         .postJournalEntry(eq(journalId), any(JournalEntryRequest.class));
 
     // Act & Assert
     assertThrows(
-        JournalNotFoundException.class,
-        () -> journalController.createJournalEntry(journalId, request));
+        AppException.class, () -> journalController.createJournalEntry(journalId, request));
     verify(journalService).postJournalEntry(journalId, request);
   }
 
   @Test
-  void getJournalEntriesByDate_ShouldReturnEntries() throws JournalNotFoundException {
+  void getJournalEntriesByDate_ShouldReturnEntries() {
     // Arrange
     String journalId = "123";
     Instant dateFrom = Instant.parse("2023-01-01T00:00:00Z");
@@ -103,18 +98,17 @@ class JournalControllerTest {
   }
 
   @Test
-  void getJournalEntriesByDate_WhenJournalNotFound_ShouldThrowException()
-      throws JournalNotFoundException {
+  void getJournalEntriesByDate_WhenJournalNotFound_ShouldThrowException() {
     // Arrange
     String journalId = "123";
     Instant dateFrom = Instant.parse("2023-01-01T00:00:00Z");
     Instant dateTo = Instant.parse("2023-12-31T23:59:59Z");
     when(journalService.getJournalEntriesByDate(journalId, dateFrom, dateTo))
-        .thenThrow(new JournalNotFoundException());
+        .thenThrow(AppException.class);
 
     // Act & Assert
     assertThrows(
-        JournalNotFoundException.class,
+        AppException.class,
         () -> journalController.getJournalEntriesByDate(journalId, dateFrom, dateTo));
     verify(journalService).getJournalEntriesByDate(journalId, dateFrom, dateTo);
   }
@@ -138,7 +132,7 @@ class JournalControllerTest {
   }
 
   @Test
-  void deleteJournalById_ShouldReturnSuccess() throws JournalNotFoundException {
+  void deleteJournalById_ShouldReturnSuccess() {
     // Arrange
     String journalId = "123";
     doNothing().when(journalService).deleteJournalById(journalId);
@@ -153,15 +147,13 @@ class JournalControllerTest {
   }
 
   @Test
-  void deleteJournalById_WhenJournalNotFound_ShouldThrowException()
-      throws JournalNotFoundException {
+  void deleteJournalById_WhenJournalNotFound_ShouldThrowException() {
     // Arrange
     String journalId = "123";
-    doThrow(new JournalNotFoundException()).when(journalService).deleteJournalById(journalId);
+    doThrow(AppException.class).when(journalService).deleteJournalById(journalId);
 
     // Act & Assert
-    assertThrows(
-        JournalNotFoundException.class, () -> journalController.deleteJournalById(journalId));
+    assertThrows(AppException.class, () -> journalController.deleteJournalById(journalId));
     verify(journalService).deleteJournalById(journalId);
   }
 }

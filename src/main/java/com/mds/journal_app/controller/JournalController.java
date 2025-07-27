@@ -1,9 +1,10 @@
 package com.mds.journal_app.controller;
 
 import com.mds.journal_app.dao.Journal;
-import com.mds.journal_app.exceptions.JournalNotFoundException;
+import com.mds.journal_app.exceptions.AppException;
 import com.mds.journal_app.pojo.*;
 import com.mds.journal_app.service.JournalService;
+import jakarta.validation.Valid;
 import java.time.Instant;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -21,19 +22,20 @@ public class JournalController {
 
   private final JournalService journalService;
 
-  /** create new journal */
+  /*
+   * creates or updates a journal
+   * if journal with same title exists, it will update the existing journal, otherwise it will create a new journal
+   * */
   @PostMapping("/journal")
-  public ResponseEntity<String> createJournal(@RequestBody JournalRequest journalRequest) {
-    log.info("createUpdateJournal() initiated");
-    journalService.postJournal(journalRequest);
-    return ResponseEntity.ok().body("journal created successfully!");
+  public ResponseEntity<PostJournalResponse> postJournal(
+      @RequestBody @Valid JournalRequest journalRequest) throws AppException {
+    return ResponseEntity.ok().body(journalService.postJournal(journalRequest));
   }
 
   /** create new entry in a journal */
   @PostMapping("journal/{journalId}/entry")
   public ResponseEntity<String> createJournalEntry(
-      @PathVariable String journalId, @RequestBody JournalEntryRequest journalEntryRequest)
-      throws JournalNotFoundException {
+      @PathVariable String journalId, @RequestBody JournalEntryRequest journalEntryRequest) {
     log.info("createJournalEntry() initiated");
     journalService.postJournalEntry(journalId, journalEntryRequest);
     return ResponseEntity.ok().body("journal entry created successfully!");
@@ -42,8 +44,9 @@ public class JournalController {
   /** get all the entries for a journal between a date range */
   @GetMapping("journal/{journalId}/entry")
   public ResponseEntity<List<JournalEntryResponse>> getJournalEntriesByDate(
-      @PathVariable String journalId, @RequestParam Instant dateFrom, @RequestParam Instant dateTo)
-      throws JournalNotFoundException {
+      @PathVariable String journalId,
+      @RequestParam Instant dateFrom,
+      @RequestParam Instant dateTo) {
     log.info("getJournalEntriesByDate() initiated");
     return ResponseEntity.ok()
         .body(journalService.getJournalEntriesByDate(journalId, dateFrom, dateTo));
@@ -56,8 +59,7 @@ public class JournalController {
   }
 
   @DeleteMapping("journal/{journalId}")
-  public ResponseEntity<List<Journal>> deleteJournalById(@PathVariable String journalId)
-      throws JournalNotFoundException {
+  public ResponseEntity<List<Journal>> deleteJournalById(@PathVariable String journalId) {
     log.info("delete journal by id:{} initiated", journalId);
     journalService.deleteJournalById(journalId);
     return ResponseEntity.ok().body(null);
