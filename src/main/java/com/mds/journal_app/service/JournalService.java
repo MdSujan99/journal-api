@@ -1,8 +1,10 @@
 package com.mds.journal_app.service;
 
+import static com.mds.journal_app.pojo.JournalConstants.JOURNAL_NOT_FOUND_MSG;
+
 import com.mds.journal_app.dao.Journal;
 import com.mds.journal_app.dao.JournalRepo;
-import com.mds.journal_app.exceptions.JournalNotFoundException;
+import com.mds.journal_app.exceptions.AppException;
 import com.mds.journal_app.mapper.JournalMapper;
 import com.mds.journal_app.pojo.*;
 import java.time.Instant;
@@ -13,31 +15,60 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class JournalService {
+
   private final JournalRepo journalRepo;
   private final JournalMapper journalMapper;
 
-  public void postJournal(JournalRequest journalRequest) {
+  public PostJournalResponse postJournal(JournalRequest journalRequest) {
     log.info("postJournal - request: {}", journalRequest);
-    validateCreateJournal(journalRequest);
-    journalRepo.save(
-        Journal.builder()
-            .title(journalRequest.getTitle())
-            .description(journalRequest.getDescription())
-            .build());
-    log.info("postJournal - journal created successfully");
+    validatePostJournal(journalRequest);
+    Journal savedJournal =
+        journalRepo.save(
+            Journal.builder()
+                .title(journalRequest.getTitle())
+                .description(journalRequest.getDescription())
+                .build());
+    log.info("postJournal - journal saved successfully");
+    return PostJournalResponse.builder()
+        .journalId(savedJournal.getId())
+        .message("Journal saved successfully!")
+        .build();
   }
 
-  private void validateCreateJournal(JournalRequest journalRequest) {
-    log.info("validateCreateJournal - validations passed");
+  private void validatePostJournal(JournalRequest journalRequest) {
+    log.info("validateUpdateRequest initiated for journalRequest: {}", journalRequest);
+    if (StringUtils.hasText(journalRequest.getId())) {
+      log.info("validateUpdateRequest - journalId is present: {}", journalRequest.getId());
+      validateUpdateRequest(journalRequest);
+    }
+    log.info("validateUpdateRequest completed for journalRequest: {}", journalRequest);
   }
 
-  public void postJournalEntry(String journalId, JournalEntryRequest journalEntryRequest)
-      throws JournalNotFoundException {
+  private void validateUpdateRequest(JournalRequest journalRequest) {
+    // Check if a journal with the same title already exists
+    Optional<Journal> existingJournal = journalRepo.findById(journalRequest.getId());
+    if (existingJournal.isPresent()) {
+      if (!StringUtils.hasText(journalRequest.getId())) {
+        throw new AppException(JOURNAL_NOT_FOUND_MSG, 404);
+      }
+      // verify if the every field is same as the existing journal
+      // if all fields are same, then throw an exception
+      Journal journal = existingJournal.get();
+      if (journal.getTitle().equals(journalRequest.getTitle())
+          && Objects.equals(journal.getDescription(), journalRequest.getDescription())) {
+        throw new IllegalArgumentException(
+            "Journal with the same title and description already exists");
+      }
+    }
+  }
+
+  public void postJournalEntry(String journalId, JournalEntryRequest journalEntryRequest) {
     log.info("postJournalEntry - request: {}", journalEntryRequest);
     // find the journal by id
     Journal existingJournal = findJournalById(journalId);
@@ -57,14 +88,14 @@ public class JournalService {
     log.info("postJournalEntry - journal entry added successfully for journalId: {}", journalId);
   }
 
-  private Journal findJournalById(String journalId) throws JournalNotFoundException {
+  private Journal findJournalById(String journalId) {
     log.info("findJournalById - journalId: {}", journalId);
     Journal existingJournal = journalRepo.findById(journalId).orElse(null);
     if (Objects.nonNull(existingJournal)) {
       log.info("findJournalById - journal found: {}", existingJournal);
       return existingJournal;
     }
-    throw new JournalNotFoundException();
+    throw new AppException(JOURNAL_NOT_FOUND_MSG, 404);
   }
 
   private static String getJournalEntryKey(Instant instant) {
@@ -76,7 +107,7 @@ public class JournalService {
   }
 
   public List<JournalEntryResponse> getJournalEntriesByDate(
-      String journalId, Instant dateFrom, Instant dateTo) throws JournalNotFoundException {
+      String journalId, Instant dateFrom, Instant dateTo) {
     log.info(
         "getJournalEntriesByDate - journalId: {}, dateFrom: {}, dateTo: {}",
         journalId,
@@ -113,7 +144,7 @@ public class JournalService {
     return allJournals.stream().map(journalMapper::toJournalResponse).toList();
   }
 
-  public void deleteJournalById(String journalId) throws JournalNotFoundException {
+  public void deleteJournalById(String journalId) {
     log.info("deleteJournalById - journalId: {}", journalId);
     findJournalById(journalId);
     journalRepo.deleteById(journalId);

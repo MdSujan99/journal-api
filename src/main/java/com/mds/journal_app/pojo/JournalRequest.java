@@ -1,5 +1,6 @@
 package com.mds.journal_app.pojo;
 
+import jakarta.validation.constraints.NotEmpty;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
@@ -9,6 +10,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class JournalRequest {
-  String title;
+  String id;
+  @NotEmpty String title;
   String description;
 }

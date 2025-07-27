@@ -6,7 +6,7 @@ import static org.mockito.Mockito.*;
 
 import com.mds.journal_app.dao.Journal;
 import com.mds.journal_app.dao.JournalRepo;
-import com.mds.journal_app.exceptions.JournalNotFoundException;
+import com.mds.journal_app.exceptions.AppException;
 import com.mds.journal_app.pojo.JournalEntryRequest;
 import com.mds.journal_app.pojo.JournalRequest;
 import com.mds.journal_app.service.JournalService;
@@ -50,7 +50,7 @@ public class JournalServiceTest {
   }
 
   @Test
-  void postJournalEntry_ShouldAddEntry_WhenJournalExists() throws JournalNotFoundException {
+  void postJournalEntry_ShouldAddEntry_WhenJournalExists() {
     // Arrange
     String journalId = "test-id";
     JournalEntryRequest entryRequest =
@@ -79,12 +79,11 @@ public class JournalServiceTest {
 
     // Act & Assert
     assertThrows(
-        JournalNotFoundException.class,
-        () -> journalService.postJournalEntry(journalId, entryRequest));
+        AppException.class, () -> journalService.postJournalEntry(journalId, entryRequest));
   }
 
   @Test
-  void postJournalEntry_ShouldInitializeEntryMap_WhenMapIsNull() throws JournalNotFoundException {
+  void postJournalEntry_ShouldInitializeEntryMap_WhenMapIsNull() {
     // Arrange
     String journalId = "test-id";
     JournalEntryRequest entryRequest =
@@ -146,7 +145,7 @@ public class JournalServiceTest {
   }
 
   @Test
-  void postJournalEntry_ShouldHandleMaxContentLength() throws JournalNotFoundException {
+  void postJournalEntry_ShouldHandleMaxContentLength() {
     // Arrange
     String journalId = "test-id";
     String longContent = "a".repeat(1000); // Assuming max length is more than 1000
@@ -166,7 +165,7 @@ public class JournalServiceTest {
   }
 
   @Test
-  void postJournalEntry_ShouldGenerateUniqueEntryId() throws JournalNotFoundException {
+  void postJournalEntry_ShouldGenerateUniqueEntryId() {
     // Arrange
     String journalId = "test-id";
     JournalEntryRequest entryRequest =
