@@ -160,4 +160,11 @@ public class JournalService {
     journalRepo.deleteById(journalId);
     log.info("deleteJournalById - journal deleted successfully for journalId: {}", journalId);
   }
+
+  public JournalResponse getJournalById(String id) {
+    log.info("getJournalById - fetching journal by id");
+    Journal journalById = findJournalById(id);
+    log.info("getJournalById - journal found: {}", journalById);
+    return journalMapper.toJournalResponse(journalById);
+  }
 }

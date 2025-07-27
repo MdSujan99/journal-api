@@ -58,6 +58,12 @@ public class JournalController {
     return ResponseEntity.ok().body(journalService.getAllJournals());
   }
 
+  @GetMapping("journal/{id}")
+  public ResponseEntity<JournalResponse> getJournalById(@PathVariable String id) {
+    log.info("getJournalById() initiated");
+    return ResponseEntity.ok().body(journalService.getJournalById(id));
+  }
+
   @DeleteMapping("journal/{journalId}")
   public ResponseEntity<List<Journal>> deleteJournalById(@PathVariable String journalId) {
     log.info("delete journal by id:{} initiated", journalId);
