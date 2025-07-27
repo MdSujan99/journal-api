@@ -9,6 +9,6 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PostJournalResponse {
-  String journalId;
+  String id;
   String message;
 }
