@@ -11,6 +11,18 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 @Slf4j
 public class AppExceptionHandler {
+  @ExceptionHandler(AppException.class)
+  public ResponseEntity<AppExceptionResponse> handleAppExceptions(AppException ex) {
+    log.error("AppException occurred - ", ex);
+    AppExceptionResponse appException =
+            AppExceptionResponse.builder()
+                    .timestamp(Instant.now())
+                    .message(ex.getMessage())
+                    .code(ex.getErrorCode())
+                    .build();
+    return ResponseEntity.status(ex.getErrorCode()).body(appException);
+  }
+
   @ExceptionHandler(Throwable.class)
   public ResponseEntity<AppExceptionResponse> handleAllExceptions(RuntimeException ex) {
     log.error("AppException occurred - ", ex);
