@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 public class JournalController {
-
   private final JournalService journalService;
 
   /** get all the entries for a journal between a date range */
@@ -47,13 +46,6 @@ public class JournalController {
         .body(BaseApiResponse.success(200, "journal deleted successfully", journalId));
   }
 
-  @GetMapping("/health")
-  public ResponseEntity<BaseApiResponse<String>> healthCheck() {
-    log.info("healhCheck() initiated");
-    return ResponseEntity.ok()
-        .body(BaseApiResponse.success(200, "API is healthy", "Hello from Journal API"));
-  }
-
   /** create new journal */
   @PostMapping("/journal")
   public ResponseEntity<BaseApiResponse<JournalResponse>> createJournal(
@@ -76,5 +68,12 @@ public class JournalController {
                 200,
                 "journal entry created successfully",
                 journalService.postJournalEntry(journalId, journalEntryRequest)));
+  }
+
+  @GetMapping("/health")
+  public ResponseEntity<BaseApiResponse<String>> healthCheck() {
+    log.info("healhCheck() initiated");
+    return ResponseEntity.ok()
+        .body(BaseApiResponse.success(200, "API is healthy", "Hello from Journal API"));
   }
 }

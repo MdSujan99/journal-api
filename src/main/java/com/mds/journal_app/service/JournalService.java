@@ -4,6 +4,7 @@ import static com.mds.journal_app.pojo.CommonConstants.KEY_DELIMITER;
 
 import com.mds.journal_app.dao.Journal;
 import com.mds.journal_app.dao.JournalRepo;
+import com.mds.journal_app.exceptions.ApiException;
 import com.mds.journal_app.mapper.JournalMapper;
 import com.mds.journal_app.pojo.*;
 import java.time.Instant;
@@ -17,14 +18,8 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @RequiredArgsConstructor
 public class JournalService {
-
   private final JournalRepo journalRepo;
-
   private final JournalMapper journalMapper;
-
-  public String testGet() {
-    return "test success";
-  }
 
   /** create a new journal */
   public JournalResponse postJournal(JournalRequest journalRequest) {
@@ -73,8 +68,10 @@ public class JournalService {
 
   private Journal findJournalById(String journalId) {
     Journal existingJournal = journalRepo.findById(journalId).orElse(null);
-    if (Objects.nonNull(existingJournal)) return existingJournal;
-    return null;
+    if (Objects.isNull(existingJournal)) {
+      throw new ApiException(String.format("Journal with id: %s not found", journalId), 404);
+    }
+    return existingJournal;
   }
 
   public List<JournalEntryResponse> getJournalEntriesByDate(
