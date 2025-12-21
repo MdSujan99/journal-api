@@ -1,8 +1,9 @@
 package com.mds.journal_app.service;
 
+import static com.mds.journal_app.pojo.CommonConstants.KEY_DELIMITER;
+
 import com.mds.journal_app.dao.Journal;
 import com.mds.journal_app.dao.JournalRepo;
-import com.mds.journal_app.exceptions.JournalNotFoundException;
 import com.mds.journal_app.mapper.JournalMapper;
 import com.mds.journal_app.pojo.*;
 import java.time.Instant;
@@ -12,13 +13,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import static com.mds.journal_app.pojo.CommonConstants.KEY_DELIMITER;
-
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class JournalService {
-
 
   private final JournalRepo journalRepo;
 
@@ -50,8 +48,8 @@ public class JournalService {
     // todo add validations
   }
 
-  public JournalResponse postJournalEntry(String journalId, JournalEntryRequest journalEntryRequest)
-      throws JournalNotFoundException {
+  public JournalResponse postJournalEntry(
+      String journalId, JournalEntryRequest journalEntryRequest) {
     Instant nowTs = Instant.now();
 
     // find the journal by id
@@ -73,14 +71,14 @@ public class JournalService {
     return journalMapper.toJournalResponse(existingJournal);
   }
 
-  private Journal findJournalById(String journalId) throws JournalNotFoundException {
+  private Journal findJournalById(String journalId) {
     Journal existingJournal = journalRepo.findById(journalId).orElse(null);
     if (Objects.nonNull(existingJournal)) return existingJournal;
-    throw new JournalNotFoundException();
+    return null;
   }
 
   public List<JournalEntryResponse> getJournalEntriesByDate(
-      String journalId, Instant dateFrom, Instant dateTo) throws JournalNotFoundException {
+      String journalId, Instant dateFrom, Instant dateTo) {
     Journal journal = findJournalById(journalId);
     Map<String, String> journalEntryMap = journal.getJournalEntryMap();
 
@@ -109,7 +107,7 @@ public class JournalService {
     return allJournals.stream().map(journalMapper::toJournalResponse).toList();
   }
 
-  public void deleteJournalById(String journalId) throws JournalNotFoundException {
+  public void deleteJournalById(String journalId) {
     findJournalById(journalId);
     journalRepo.deleteById(journalId);
   }

@@ -1,6 +1,5 @@
 package com.mds.journal_app.controller;
 
-import com.mds.journal_app.exceptions.JournalNotFoundException;
 import com.mds.journal_app.pojo.*;
 import com.mds.journal_app.service.JournalService;
 import java.time.Instant;
@@ -23,8 +22,9 @@ public class JournalController {
   /** get all the entries for a journal between a date range */
   @GetMapping("journal/{journalId}/entry")
   public ResponseEntity<List<JournalEntryResponse>> getJournalEntriesByDate(
-      @PathVariable String journalId, @RequestParam Instant dateFrom, @RequestParam Instant dateTo)
-      throws JournalNotFoundException {
+      @PathVariable String journalId,
+      @RequestParam Instant dateFrom,
+      @RequestParam Instant dateTo) {
     log.info("getJournalEntriesByDate() initiated");
     return ResponseEntity.ok()
         .body(journalService.getJournalEntriesByDate(journalId, dateFrom, dateTo));
@@ -40,8 +40,7 @@ public class JournalController {
   }
 
   @DeleteMapping("journal/{journalId}")
-  public ResponseEntity<BaseApiResponse<String>> deleteJournalById(@PathVariable String journalId)
-      throws JournalNotFoundException {
+  public ResponseEntity<BaseApiResponse<String>> deleteJournalById(@PathVariable String journalId) {
     log.info("delete journal by id:{} initiated", journalId);
     journalService.deleteJournalById(journalId);
     return ResponseEntity.ok()
@@ -69,8 +68,7 @@ public class JournalController {
   /** create new entry in a journal */
   @PostMapping("journal/{journalId}/entry")
   public ResponseEntity<BaseApiResponse<JournalResponse>> createJournalEntry(
-      @PathVariable String journalId, @RequestBody JournalEntryRequest journalEntryRequest)
-      throws JournalNotFoundException {
+      @PathVariable String journalId, @RequestBody JournalEntryRequest journalEntryRequest) {
     log.info("createJournalEntry() initiated");
     return ResponseEntity.ok()
         .body(
