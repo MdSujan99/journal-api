@@ -3,7 +3,7 @@ server:
 spring:
   data:
     mongodb:
-      uri: "mongodb://localhost:27017/"
+      uri: $SPRING_DATA_MONGODB_URI
       database: journal-app
       auto-index-creation: true
       repositories:
