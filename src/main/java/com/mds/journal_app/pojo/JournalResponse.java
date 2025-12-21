@@ -16,5 +16,5 @@ public class JournalResponse {
   String description;
   Instant createdAt;
   Instant updatedAt;
-  Map<String, JournalEntryResponse> journalEntryMap;
+  Map<String, String> journalEntryMap;
 }
