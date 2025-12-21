@@ -68,7 +68,7 @@ public class JournalController {
 
   /** create new entry in a journal */
   @PostMapping("journal/{journalId}/entry")
-  public ResponseEntity<BaseApiResponse<JournalEntryResponse>> createJournalEntry(
+  public ResponseEntity<BaseApiResponse<JournalResponse>> createJournalEntry(
       @PathVariable String journalId, @RequestBody JournalEntryRequest journalEntryRequest)
       throws JournalNotFoundException {
     log.info("createJournalEntry() initiated");
