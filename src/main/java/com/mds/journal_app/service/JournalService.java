@@ -28,25 +28,29 @@ public class JournalService {
   }
 
   /** create a new journal */
-  public void postJournal(JournalRequest journalRequest) {
+  public JournalResponse postJournal(JournalRequest journalRequest) {
     validateCreateJournal(journalRequest);
-    journalRepo.save(
+    Journal journal =
         Journal.builder()
             .title(journalRequest.getTitle())
             .description(journalRequest.getDescription())
-            .build());
+            .build();
+    journalRepo.save(journal);
+    return journalMapper.toJournalResponse(journal);
   }
 
   private void validateCreateJournal(JournalRequest journalRequest) {
     log.info("validateCreateJournal - validations passed");
+    // todo add validations
   }
 
   private void validateCreateJournalEntry(JournalEntryRequest journalEntryRequest) {
     log.info("validateCreateJournalEntry - validations passed");
+    // todo add validations
   }
 
-  public void postJournalEntry(String journalId, JournalEntryRequest journalEntryRequest)
-      throws JournalNotFoundException {
+  public JournalEntryResponse postJournalEntry(
+      String journalId, JournalEntryRequest journalEntryRequest) throws JournalNotFoundException {
     // find the journal by id
     Journal existingJournal = findJournalById(journalId);
 
@@ -63,6 +67,7 @@ public class JournalService {
             .build();
     existingJournal.getJournalEntryMap().put(key, journalEntryResponse);
     journalRepo.save(existingJournal);
+    return journalEntryResponse;
   }
 
   private Journal findJournalById(String journalId) throws JournalNotFoundException {
@@ -100,7 +105,7 @@ public class JournalService {
 
   public List<JournalResponse> getAllJournals() {
     List<Journal> allJournals = journalRepo.findAll();
-    return allJournals.stream().map(journal -> journalMapper.toJournalResponse(journal)).toList();
+    return allJournals.stream().map(journalMapper::toJournalResponse).toList();
   }
 
   public void deleteJournalById(String journalId) throws JournalNotFoundException {

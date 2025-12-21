@@ -1,6 +1,5 @@
 package com.mds.journal_app.controller;
 
-import com.mds.journal_app.dao.Journal;
 import com.mds.journal_app.exceptions.JournalNotFoundException;
 import com.mds.journal_app.pojo.*;
 import com.mds.journal_app.service.JournalService;
@@ -21,30 +20,6 @@ public class JournalController {
 
   private final JournalService journalService;
 
-  @GetMapping("/test")
-  public ResponseEntity<String> testGet() {
-    log.info("testGet() initiated");
-    return ResponseEntity.ok().body(journalService.testGet());
-  }
-
-  /** create new journal */
-  @PostMapping("/journal")
-  public ResponseEntity<String> createJournal(@RequestBody JournalRequest journalRequest) {
-    log.info("createUpdateJournal() initiated");
-    journalService.postJournal(journalRequest);
-    return ResponseEntity.ok().body("journal created successfully!");
-  }
-
-  /** create new entry in a journal */
-  @PostMapping("journal/{journalId}/entry")
-  public ResponseEntity<String> createJournalEntry(
-      @PathVariable String journalId, @RequestBody JournalEntryRequest journalEntryRequest)
-      throws JournalNotFoundException {
-    log.info("createJournalEntry() initiated");
-    journalService.postJournalEntry(journalId, journalEntryRequest);
-    return ResponseEntity.ok().body("journal entry created successfully!");
-  }
-
   /** get all the entries for a journal between a date range */
   @GetMapping("journal/{journalId}/entry")
   public ResponseEntity<List<JournalEntryResponse>> getJournalEntriesByDate(
@@ -56,16 +31,52 @@ public class JournalController {
   }
 
   @GetMapping("journal")
-  public ResponseEntity<List<JournalResponse>> getAllJournals() {
+  public ResponseEntity<BaseApiResponse<List<JournalResponse>>> getAllJournals() {
     log.info("getAllJournals() initiated");
-    return ResponseEntity.ok().body(journalService.getAllJournals());
+    return ResponseEntity.ok()
+        .body(
+            BaseApiResponse.success(
+                200, "fetched all journals successfully", journalService.getAllJournals()));
   }
 
   @DeleteMapping("journal/{journalId}")
-  public ResponseEntity<List<Journal>> deleteJournalById(@PathVariable String journalId)
+  public ResponseEntity<BaseApiResponse<String>> deleteJournalById(@PathVariable String journalId)
       throws JournalNotFoundException {
     log.info("delete journal by id:{} initiated", journalId);
     journalService.deleteJournalById(journalId);
-    return ResponseEntity.ok().body(null);
+    return ResponseEntity.ok()
+        .body(BaseApiResponse.success(200, "journal deleted successfully", journalId));
+  }
+
+  @GetMapping("/health")
+  public ResponseEntity<BaseApiResponse<String>> healthCheck() {
+    log.info("healhCheck() initiated");
+    return ResponseEntity.ok()
+        .body(BaseApiResponse.success(200, "API is healthy", "Hello from Journal API"));
+  }
+
+  /** create new journal */
+  @PostMapping("/journal")
+  public ResponseEntity<BaseApiResponse<JournalResponse>> createJournal(
+      @RequestBody JournalRequest journalRequest) {
+    log.info("createUpdateJournal() initiated");
+    return ResponseEntity.ok()
+        .body(
+            BaseApiResponse.success(
+                200, "journal created successfully", journalService.postJournal(journalRequest)));
+  }
+
+  /** create new entry in a journal */
+  @PostMapping("journal/{journalId}/entry")
+  public ResponseEntity<BaseApiResponse<JournalEntryResponse>> createJournalEntry(
+      @PathVariable String journalId, @RequestBody JournalEntryRequest journalEntryRequest)
+      throws JournalNotFoundException {
+    log.info("createJournalEntry() initiated");
+    return ResponseEntity.ok()
+        .body(
+            BaseApiResponse.success(
+                200,
+                "journal entry created successfully",
+                journalService.postJournalEntry(journalId, journalEntryRequest)));
   }
 }
