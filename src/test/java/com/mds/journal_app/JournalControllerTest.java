@@ -1,37 +1,43 @@
 package com.mds.journal_app;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static com.mds.journal_app.TestUtils.JOURNAL_ID;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mds.journal_app.controller.JournalController;
+import com.mds.journal_app.pojo.JournalRequest;
 import com.mds.journal_app.pojo.JournalResponse;
 import com.mds.journal_app.service.JournalService;
 import java.util.Collections;
 import java.util.List;
-
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-@ExtendWith(MockitoExtension.class)
+@ActiveProfiles("test")
+@WebMvcTest(JournalController.class)
 class JournalControllerTest {
-  @Mock private JournalService journalService;
+  @MockBean private JournalService journalService;
 
-  @InjectMocks private JournalController journalController;
-  @InjectMocks private TestUtils testUtils;
+  @Autowired private MockMvc mockMvc;
+  private final TestUtils testUtils = new TestUtils();
+  private final ObjectMapper objectMapper = new ObjectMapper();
 
   @Test
   void test_getAllJournals_whenNoJournals() throws Exception {
 
     when(journalService.getAllJournals()).thenReturn(Collections.emptyList());
-    MockMvc mockMvc = MockMvcBuilders.standaloneSetup(journalController).build();
 
     mockMvc
         .perform(
@@ -46,13 +52,57 @@ class JournalControllerTest {
 
     List<JournalResponse> sampleJournals = testUtils.getSampleJournals();
     when(journalService.getAllJournals()).thenReturn(sampleJournals);
-    MockMvc mockMvc = MockMvcBuilders.standaloneSetup(journalController).build();
 
     mockMvc
         .perform(
             MockMvcRequestBuilders.get("/api/journal")
                 .accept(org.springframework.http.MediaType.APPLICATION_JSON))
         .andExpect(MockMvcResultMatchers.status().isOk())
-        .andExpect(MockMvcResultMatchers.jsonPath("$.payload", Matchers.hasSize(sampleJournals.size())));
+        .andExpect(
+            MockMvcResultMatchers.jsonPath("$.payload", Matchers.hasSize(sampleJournals.size())));
+  }
+
+  @Test
+  void test_deleteJournalsById() throws Exception {
+    doNothing().when(journalService).deleteJournalById(any());
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.delete("/api/journal/" + JOURNAL_ID)
+                .accept(org.springframework.http.MediaType.APPLICATION_JSON))
+        .andExpect(MockMvcResultMatchers.status().isOk())
+        .andExpect(MockMvcResultMatchers.jsonPath("$.payload", Matchers.equalTo(JOURNAL_ID)));
+  }
+
+  @Test
+  void test_createJournal() throws Exception {
+
+    JournalRequest request = testUtils.getSampleJournalRequest();
+    JournalResponse response = testUtils.getSampleJournalResponse();
+    when(journalService.postJournal(any())).thenReturn(response);
+
+    mockMvc
+        .perform(
+            post("/api/journal")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isOk())
+        .andExpect(
+            MockMvcResultMatchers.jsonPath("$.payload.id", Matchers.equalTo(response.getId())))
+        .andExpect(
+            MockMvcResultMatchers.jsonPath(
+                "$.payload.title", Matchers.equalTo(response.getTitle())))
+        .andExpect(
+            MockMvcResultMatchers.jsonPath(
+                "$.payload.description", Matchers.equalTo(response.getDescription())))
+        .andExpect(
+            MockMvcResultMatchers.jsonPath(
+                "$.payload.createdAt", Matchers.equalTo(response.getCreatedAt().toString())))
+        .andExpect(
+            MockMvcResultMatchers.jsonPath(
+                "$.payload.updatedAt", Matchers.equalTo(response.getUpdatedAt().toString())))
+        .andExpect(
+            MockMvcResultMatchers.jsonPath(
+                "$.payload.journalEntryMap", Matchers.equalTo(response.getJournalEntryMap())));
   }
 }
