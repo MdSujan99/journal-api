@@ -18,6 +18,15 @@ import org.springframework.web.bind.annotation.*;
 public class JournalController {
   private final JournalService journalService;
 
+  @GetMapping("journal")
+  public ResponseEntity<BaseApiResponse<List<JournalResponse>>> getAllJournals() {
+    log.info("getAllJournals() initiated");
+    return ResponseEntity.ok()
+        .body(
+            BaseApiResponse.success(
+                200, "fetched all journals successfully", journalService.getAllJournals()));
+  }
+
   /** get all the entries for a journal between a date range */
   @GetMapping("journal/{journalId}/entry")
   public ResponseEntity<List<JournalEntryResponse>> getJournalEntriesByDate(
@@ -27,15 +36,6 @@ public class JournalController {
     log.info("getJournalEntriesByDate() initiated");
     return ResponseEntity.ok()
         .body(journalService.getJournalEntriesByDate(journalId, dateFrom, dateTo));
-  }
-
-  @GetMapping("journal")
-  public ResponseEntity<BaseApiResponse<List<JournalResponse>>> getAllJournals() {
-    log.info("getAllJournals() initiated");
-    return ResponseEntity.ok()
-        .body(
-            BaseApiResponse.success(
-                200, "fetched all journals successfully", journalService.getAllJournals()));
   }
 
   @DeleteMapping("journal/{journalId}")
