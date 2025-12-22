@@ -1,7 +1,6 @@
 package com.mds.journal_app.dao;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.mds.journal_app.pojo.JournalEntryResponse;
 import java.time.Instant;
 import java.util.Map;
 import lombok.AccessLevel;
@@ -35,5 +34,5 @@ public class Journal {
   @Field("updatedAt")
   Instant updatedAt;
 
-  @JsonIgnore Map<String, JournalEntryResponse> journalEntryMap;
+  @JsonIgnore Map<String, String> journalEntryMap;
 }

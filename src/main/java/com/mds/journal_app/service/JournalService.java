@@ -1,13 +1,13 @@
 package com.mds.journal_app.service;
 
+import static com.mds.journal_app.pojo.CommonConstants.KEY_DELIMITER;
+
 import com.mds.journal_app.dao.Journal;
 import com.mds.journal_app.dao.JournalRepo;
-import com.mds.journal_app.exceptions.JournalNotFoundException;
+import com.mds.journal_app.exceptions.ApiException;
 import com.mds.journal_app.mapper.JournalMapper;
 import com.mds.journal_app.pojo.*;
 import java.time.Instant;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -18,35 +18,35 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @RequiredArgsConstructor
 public class JournalService {
-
   private final JournalRepo journalRepo;
-
   private final JournalMapper journalMapper;
 
-  public String testGet() {
-    return "test success";
-  }
-
   /** create a new journal */
-  public void postJournal(JournalRequest journalRequest) {
+  public JournalResponse postJournal(JournalRequest journalRequest) {
     validateCreateJournal(journalRequest);
-    journalRepo.save(
+    Journal journal =
         Journal.builder()
             .title(journalRequest.getTitle())
             .description(journalRequest.getDescription())
-            .build());
+            .build();
+    journalRepo.save(journal);
+    return journalMapper.toJournalResponse(journal);
   }
 
   private void validateCreateJournal(JournalRequest journalRequest) {
     log.info("validateCreateJournal - validations passed");
+    // todo add validations
   }
 
   private void validateCreateJournalEntry(JournalEntryRequest journalEntryRequest) {
     log.info("validateCreateJournalEntry - validations passed");
+    // todo add validations
   }
 
-  public void postJournalEntry(String journalId, JournalEntryRequest journalEntryRequest)
-      throws JournalNotFoundException {
+  public JournalResponse postJournalEntry(
+      String journalId, JournalEntryRequest journalEntryRequest) {
+    Instant nowTs = Instant.now();
+
     // find the journal by id
     Journal existingJournal = findJournalById(journalId);
 
@@ -54,34 +54,30 @@ public class JournalService {
     if (Objects.isNull(existingJournal.getJournalEntryMap())) {
       existingJournal.setJournalEntryMap(new HashMap<>());
     }
-    Instant entryDate = Instant.now();
-    String key = getJournalEntryKey(entryDate);
-    JournalEntryResponse journalEntryResponse =
-        JournalEntryResponse.builder()
-            .textContent(journalEntryRequest.getTextContent())
-            .dateCreated(entryDate)
-            .build();
-    existingJournal.getJournalEntryMap().put(key, journalEntryResponse);
+
+    existingJournal
+        .getJournalEntryMap()
+        .put(
+            nowTs.toEpochMilli() + KEY_DELIMITER + journalEntryRequest.getTitle(),
+            journalEntryRequest.getTextContent());
+
     journalRepo.save(existingJournal);
+
+    return journalMapper.toJournalResponse(existingJournal);
   }
 
-  private Journal findJournalById(String journalId) throws JournalNotFoundException {
+  private Journal findJournalById(String journalId) {
     Journal existingJournal = journalRepo.findById(journalId).orElse(null);
-    if (Objects.nonNull(existingJournal)) return existingJournal;
-    throw new JournalNotFoundException();
-  }
-
-  private static String getJournalEntryKey(Instant instant) {
-    // Define a formatter with the desired format
-    DateTimeFormatter formatter =
-        DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'").withZone(ZoneOffset.UTC);
-    return formatter.format(instant);
+    if (Objects.isNull(existingJournal)) {
+      throw new ApiException(String.format("Journal with id: %s not found", journalId), 404);
+    }
+    return existingJournal;
   }
 
   public List<JournalEntryResponse> getJournalEntriesByDate(
-      String journalId, Instant dateFrom, Instant dateTo) throws JournalNotFoundException {
+      String journalId, Instant dateFrom, Instant dateTo) {
     Journal journal = findJournalById(journalId);
-    Map<String, JournalEntryResponse> journalEntryMap = journal.getJournalEntryMap();
+    Map<String, String> journalEntryMap = journal.getJournalEntryMap();
 
     if (journalEntryMap == null || journalEntryMap.isEmpty()) {
       // Return an empty list if journalEntryMap is null or empty
@@ -94,16 +90,21 @@ public class JournalService {
               Instant entryDate = Instant.parse(entry.getKey());
               return !entryDate.isBefore(dateFrom) && !entryDate.isAfter(dateTo);
             })
-        .map(Map.Entry::getValue)
+        .map(
+            entry ->
+                JournalEntryResponse.builder()
+                    .textContent(entry.getValue())
+                    .dateCreated(Instant.parse(entry.getKey()))
+                    .build())
         .collect(Collectors.toList());
   }
 
   public List<JournalResponse> getAllJournals() {
     List<Journal> allJournals = journalRepo.findAll();
-    return allJournals.stream().map(journal -> journalMapper.toJournalResponse(journal)).toList();
+    return allJournals.stream().map(journalMapper::toJournalResponse).toList();
   }
 
-  public void deleteJournalById(String journalId) throws JournalNotFoundException {
+  public void deleteJournalById(String journalId) {
     findJournalById(journalId);
     journalRepo.deleteById(journalId);
   }
