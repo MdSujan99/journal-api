@@ -1,21 +1,27 @@
-package com.mds.journal_app.pojo;
+package com.mds.journal_app.domain;
 
-import com.mds.journal_app.domain.JournalEntry;
 import java.time.Instant;
 import java.util.List;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Data
 @Builder
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class JournalResponse {
+public class Journal {
   String id;
+
   String title;
+
   String description;
+
   Instant createdAt;
+
   Instant updatedAt;
+
   List<JournalEntry> journalEntryMap;
 }

@@ -1,11 +1,9 @@
-package com.mds.journal_app.dao;
+package com.mds.journal_app.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.Instant;
-import java.util.Map;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Data;
+import java.util.List;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -17,8 +15,12 @@ import org.springframework.data.mongodb.core.mapping.Field;
 @Document("journal")
 @Data
 @Builder
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Journal {
+public class JournalMongo {
   @JsonIgnore @Id String id;
 
   @Indexed(unique = true)
@@ -34,5 +36,5 @@ public class Journal {
   @Field("updatedAt")
   Instant updatedAt;
 
-  @JsonIgnore Map<String, String> journalEntryMap;
+  @JsonIgnore List<JournalEntry> journalEntryMap;
 }

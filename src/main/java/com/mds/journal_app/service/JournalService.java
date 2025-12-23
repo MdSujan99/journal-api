@@ -1,15 +1,13 @@
 package com.mds.journal_app.service;
 
-import static com.mds.journal_app.pojo.CommonConstants.KEY_DELIMITER;
-
-import com.mds.journal_app.dao.Journal;
-import com.mds.journal_app.dao.JournalRepo;
+import com.mds.journal_app.dao.JournalDao;
+import com.mds.journal_app.domain.Journal;
+import com.mds.journal_app.domain.JournalEntry;
 import com.mds.journal_app.exceptions.ApiException;
 import com.mds.journal_app.mapper.JournalMapper;
 import com.mds.journal_app.pojo.*;
 import java.time.Instant;
 import java.util.*;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,18 +16,14 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @RequiredArgsConstructor
 public class JournalService {
-  private final JournalRepo journalRepo;
+  private final JournalDao journalDao;
   private final JournalMapper journalMapper;
 
   /** create a new journal */
   public JournalResponse postJournal(JournalRequest journalRequest) {
     validateCreateJournal(journalRequest);
-    Journal journal =
-        Journal.builder()
-            .title(journalRequest.getTitle())
-            .description(journalRequest.getDescription())
-            .build();
-    journalRepo.save(journal);
+    Journal journal = journalMapper.fromJournalReqToJournal(journalRequest);
+    journalDao.saveJournal(journal);
     return journalMapper.toJournalResponse(journal);
   }
 
@@ -52,22 +46,24 @@ public class JournalService {
 
     // make a new entry in its journalEntriesMap
     if (Objects.isNull(existingJournal.getJournalEntryMap())) {
-      existingJournal.setJournalEntryMap(new HashMap<>());
+      existingJournal.setJournalEntryMap(new ArrayList<>());
     }
 
     existingJournal
         .getJournalEntryMap()
-        .put(
-            nowTs.toEpochMilli() + KEY_DELIMITER + journalEntryRequest.getTitle(),
-            journalEntryRequest.getTextContent());
+        .add(
+            JournalEntry.builder()
+                .entryContent(journalEntryRequest.getTextContent())
+                .entryTitle(journalEntryRequest.getTitle())
+                .build());
 
-    journalRepo.save(existingJournal);
+    journalDao.saveJournal(existingJournal);
 
     return journalMapper.toJournalResponse(existingJournal);
   }
 
   private Journal findJournalById(String journalId) {
-    Journal existingJournal = journalRepo.findById(journalId).orElse(null);
+    Journal existingJournal = journalDao.findById(journalId);
     if (Objects.isNull(existingJournal)) {
       throw new ApiException(String.format("Journal with id: %s not found", journalId), 404);
     }
@@ -76,36 +72,16 @@ public class JournalService {
 
   public List<JournalEntryResponse> getJournalEntriesByDate(
       String journalId, Instant dateFrom, Instant dateTo) {
-    Journal journal = findJournalById(journalId);
-    Map<String, String> journalEntryMap = journal.getJournalEntryMap();
-
-    if (journalEntryMap == null || journalEntryMap.isEmpty()) {
-      // Return an empty list if journalEntryMap is null or empty
-      return Collections.emptyList();
-    }
-
-    return journalEntryMap.entrySet().stream()
-        .filter(
-            entry -> {
-              Instant entryDate = Instant.parse(entry.getKey());
-              return !entryDate.isBefore(dateFrom) && !entryDate.isAfter(dateTo);
-            })
-        .map(
-            entry ->
-                JournalEntryResponse.builder()
-                    .textContent(entry.getValue())
-                    .dateCreated(Instant.parse(entry.getKey()))
-                    .build())
-        .collect(Collectors.toList());
+    return null;
   }
 
   public List<JournalResponse> getAllJournals() {
-    List<Journal> allJournals = journalRepo.findAll();
+    List<Journal> allJournals = journalDao.findAll();
     return allJournals.stream().map(journalMapper::toJournalResponse).toList();
   }
 
   public void deleteJournalById(String journalId) {
     findJournalById(journalId);
-    journalRepo.deleteById(journalId);
+    journalDao.deleteById(journalId);
   }
 }

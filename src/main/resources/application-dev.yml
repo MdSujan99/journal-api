@@ -1,10 +1,13 @@
 server:
   port: 8081
 spring:
-  data:
-    mongodb:
-      uri: $SPRING_DATA_MONGODB_URI
-      database: journal-app
-      auto-index-creation: true
-      repositories:
-        enabled: true
+  jpa:
+    database: POSTGRESQL
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    datasource:
+      platform: postgres
+      url: $JPA_POSTGRES_CONNECTION_STRING
+      username: postgres
+      password: $JPA_POSTGRES_PWD
