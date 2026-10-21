@@ -87,16 +87,32 @@ public class JournalService {
     return journalEntryMap.entrySet().stream()
         .filter(
             entry -> {
-              Instant entryDate = Instant.parse(entry.getKey());
+              Instant entryDate = parseEntryDate(entry.getKey());
               return !entryDate.isBefore(dateFrom) && !entryDate.isAfter(dateTo);
             })
         .map(
             entry ->
                 JournalEntryResponse.builder()
                     .textContent(entry.getValue())
-                    .dateCreated(Instant.parse(entry.getKey()))
+                    .dateCreated(parseEntryDate(entry.getKey()))
                     .build())
         .collect(Collectors.toList());
+  }
+
+  private Instant parseEntryDate(String key) {
+    try {
+      if (key != null && key.contains(KEY_DELIMITER)) {
+        String timestampStr = key.substring(0, key.indexOf(KEY_DELIMITER));
+        try {
+          return Instant.ofEpochMilli(Long.parseLong(timestampStr));
+        } catch (NumberFormatException e) {
+          return Instant.parse(timestampStr);
+        }
+      }
+      return key != null ? Instant.parse(key) : Instant.now();
+    } catch (Exception e) {
+      return Instant.now();
+    }
   }
 
   public List<JournalResponse> getAllJournals() {
