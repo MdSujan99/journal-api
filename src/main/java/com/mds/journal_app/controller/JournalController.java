@@ -12,7 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Journal", description = "Endpoints for managing journals and entries")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "${cors.allowed-origins:*}")
 @Slf4j
 @RequiredArgsConstructor
 @RestController

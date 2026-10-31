@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: journal-api
+    runtime: docker
+    plan: free
+    region: oregon
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: dev
+      - key: SPRING_DATA_MONGODB_URI
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        value: "*"

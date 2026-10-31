@@ -15,6 +15,7 @@ FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 COPY --from=build /app/build/libs/*.jar app.jar
 
-EXPOSE 8080
+ENV PORT=8081
+EXPOSE 8081
 ENTRYPOINT ["java","-XX:+UseContainerSupport","-XX:MaxRAMPercentage=75","-jar","app.jar"]
 
